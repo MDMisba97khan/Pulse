@@ -2,8 +2,8 @@ package com.example.pulse
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pulse.GameEngine
@@ -31,7 +30,6 @@ import kotlin.math.sin
 
 @Composable
 fun GameScreen(engine: GameEngine) {
-    val context = LocalContext.current
 
     var secondsLeft by remember { mutableFloatStateOf(45f) }
     var currentScore by remember { mutableIntStateOf(0) }
@@ -98,7 +96,7 @@ private fun DrawScope.drawGame(engine: GameEngine, secondsLeft: Float, score: In
 
     drawOrb(engine)
 
-    // Pulse overlay
+    // Pulse overlay: screen pulses with heartbeat
     val beat = Math.sin(engine.pulsePhase * 2 * PI).toFloat()
     val pulseScale = 1f + beat * 0.03f
     drawRect(Color.Black.copy(alpha = engine.darkenAlpha * (1f - beat * 0.3f)))

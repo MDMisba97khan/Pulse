@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
+import java.io.File
 
 class AudioManager(private val context: Context) {
     private var soundPool: SoundPool? = null
@@ -23,14 +24,23 @@ class AudioManager(private val context: Context) {
             .setAudioAttributes(attrs)
             .build()
 
-        // 60 BPM heartbeat: 72 bpm => 0.833s per beat, but rhythm is 0.8s
-        ambientId = soundPool!!.load(generateTone(60f, 4f, 0.06f), 0)
-        chimeId = soundPool!!.load(generateTone(520f, 0.35f, 0.18f), 0)
-        whooshId = soundPool!!.load(generateTone(220f, 1.2f, 0.2f), 0)
-        burstId = soundPool!!.load(generateTone(523f, 0.5f, 0.12f), 0)
+        val cacheDir = context.cacheDir
+        val ambientFile = File(cacheDir, "ambient.wav")
+        writeTone(ambientFile, 60f, 4f, 0.06f)
+        val f1 = File(cacheDir, "chime.wav")
+        writeTone(f1, 520f, 0.35f, 0.18f)
+        val f2 = File(cacheDir, "whoosh.wav")
+        writeTone(f2, 220f, 1.2f, 0.2f)
+        val f3 = File(cacheDir, "burst.wav")
+        writeTone(f3, 523f, 0.5f, 0.12f)
+
+        ambientId = soundPool!!.load(ambientFile.absolutePath, 0)
+        chimeId = soundPool!!.load(f1.absolutePath, 0)
+        whooshId = soundPool!!.load(f2.absolutePath, 0)
+        burstId = soundPool!!.load(f3.absolutePath, 0)
     }
 
-    private fun generateTone(freq: Float, durationSec: Float, volume: Float): ByteArray {
+    private fun writeTone(file: File, freq: Float, durationSec: Float, volume: Float) {
         val sr = 44100
         val n = (sr * durationSec).toInt()
         val buf = ByteArray(n * 2)
@@ -39,9 +49,10 @@ class AudioManager(private val context: Context) {
             val sine = (Math.sin((2 * Math.PI * freq * t).toDouble()) * 0.25f * volume).toFloat()
             val s = (sine * 32767).toShort()
             buf[i * 2] = s.toByte()
-            buf[i * 2 + 1] = (s shr 8).toByte()
+            buf[i * 2 + 1] = (s ushr 8).toByte()
         }
-        return buf
+        file.writeBytes(String(buf).decodeToString())
+        file.setWritable(true)
     }
 
     fun playChime() { if (!muted) soundPool?.play(chimeId, 0.5f, 0.5f, 1, 0, 1f) }

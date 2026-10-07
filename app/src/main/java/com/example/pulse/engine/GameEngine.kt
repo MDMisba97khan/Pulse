@@ -64,7 +64,6 @@ class GameEngine(
 
         // Sync to next beat (0.8s interval)
         nextBeatTime = now + ((800_000_000 - (System.nanoTime() % 800_000_000L)).coerceAtLeast(0L))
-        lastTapTime = now
 
         pulsePhase = 0f
         shapes.add(Shape.spawnOpposite(screenW, screenH, driftLeft, 0.8f))
@@ -120,7 +119,7 @@ class GameEngine(
         lost = true
         audio.stopAmbient()
         audio.playChime()
-        audio.vibrate(null, 100)
+        audio.vibrate(100)
         darkenAlpha = 0.3f
         onLose?.invoke()
     }
@@ -129,7 +128,7 @@ class GameEngine(
         if (score >= 10 && !won) {
             won = true
             audio.playBurst()
-            audio.vibrate(null, 200)
+            audio.vibrate(200)
             onWin?.invoke()
         }
     }
